@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  p Personalized visa checkout
+  script(type="text/javascript" src="https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/integration/v1/sdk.js")
+  script(type="text/javascript" src="./viewscripts/view_visa.src.js")
+
+  input(type="image" class="v-button img" src="https://sandbox.secure.checkout.visa.com/wallet-services-web/xo/button.png" onClick="alert('hello world')") 
+  a(href="#" class="v-learn-default") Tell Me More
+
+  p Personal simple checkout
+  form(name="PrePage" method = "post" action = "https://scotest.authorize.net/payment/CatalogPayment.aspx") 
+    input( type = "hidden" name = "LinkId" value ="23f49b91-5373-43ec-8c8d-b676dd16659d")
+    input(
+      type = "image" 
+      src ="//testcontent.authorize.net/images/buy-now-gold.gif"
+      )

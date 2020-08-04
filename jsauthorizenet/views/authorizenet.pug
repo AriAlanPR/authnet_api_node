@@ -1,0 +1,90 @@
+extends layout
+
+block content
+  h1= title
+
+  p Authorize net Custom Checkout
+
+  |Netsuite Product #{producttype} #{invoiceid} 
+  p 
+  |Description #{description} 
+  p
+  |Amount $ #{amount} 
+  p
+  input(type="image" class="v-button img" src="https://sandbox.secure.checkout.visa.com/wallet-services-web/xo/button.png") 
+  
+  //- p Personal simple checkout
+  //- form(name="PrePage" method = "post" action = "https://scotest.authorize.net/payment/CatalogPayment.aspx") 
+  //-   input( type = "hidden" name = "LinkId" value ="23f49b91-5373-43ec-8c8d-b676dd16659d")
+  //-   input(
+  //-     type = "image" 
+  //-     src ="//testcontent.authorize.net/images/buy-now-gold.gif"
+  //-     )
+
+  script(type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js")
+  script(type="text/javascript" src="https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/integration/v1/sdk.js")
+  script(type="text/javascript").
+      function blurElement(id){
+        document.getElementById(id).blur();
+      }
+
+      function elementValue(id){
+        return document.getElementById(id).value;
+      }
+
+      function onVisaCheckoutReady(){
+          V.init({ 
+              apikey: "GW2O1539KO9ABAJ8PQOD21DLWiVpL3BGwLM-46y-GxY4CSG0I",
+              review: {
+                message: "!{description}",
+                buttonAction: "Pay"
+              },
+              paymentRequest: {
+                merchantRequestId: "!{merchantid}",
+                currencyCode: "USD",
+                subtotal: "!{amount}",
+                total: "!{amount}",
+                description: "!{description}",
+                orderId: "!{invoiceid}"
+              } 
+            });
+          V.on("payment.success", async function(payment){ 
+            console.log("Payment", payment);
+
+            var visa_src_body = {
+                                  datavalue: payment.encPaymentData, 
+                                  encKey: payment.encKey, 
+                                  callId: payment.callid
+                                };
+
+            let authresponse = await fetch('http://localhost:3000/authorizenet/visa_src', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(visa_src_body)
+            }); 
+
+            authresponse = await authresponse.json();
+            console.log("Authorize net response:", authresponse);
+
+            let nsresponse = await fetch( 'http://localhost:3000/authorizenet/push_netsuite', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(authresponse)
+            });
+
+            nsresponse = await nsresponse.json();
+            console.log("Netsuite response: ", nsresponse);
+            alert("Payment success " + nsresponse);
+
+           });
+          V.on("payment.cancel", function(payment){ 
+            console.log("Order canceled"); 
+            });
+          V.on("payment.error", function(payment, error){
+            console.log("Error");
+           });
+      }
