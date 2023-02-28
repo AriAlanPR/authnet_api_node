@@ -5,7 +5,7 @@ var test_sl = function(){
         try{
             console.log("Sending data:", data);
 
-            var nsdata = await fetch('https://tstdrv1697389.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=362&deploy=1&compid=TSTDRV1697389&h=8b2c42fe349f7759db84', {
+            var nsdata = await fetch('netsuite_url_here', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
